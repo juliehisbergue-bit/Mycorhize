@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Les mycorhizes – découvrir et se tester</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#FBFCF8; --sheet:#FFFFFF; --ink:#1F2A36; --muted:#5B6773; --line:#C9D3DC;
+  --soil:#8B6A4A; --soil-dark:#6E5239; --root:#EFE2C6; --hypha:#FFFFFF; --stem:#3E8E41; --leaf:#5DB45F;
+  --water:#2F7FD0; --sugar:#E8742A; --ok:#2E8B57; --bad:#C0392B; --key:#FFF4D6;
+  --orange:#E8742A; --blue:#3567C9; --pot:#B5653F; --grid:#D4E6DD; --grid-strong:#A9CDBB;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#17201C; --sheet:#1E2924; --ink:#E8EEF2; --muted:#A3B0BA; --line:#3A4750;
+    --soil:#5E4631; --soil-dark:#4A3626; --water:#6FA8EA; --sugar:#F28C45; --key:#3A3322; --orange:#F28C45; --blue:#6F9BEA;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#17201C; --sheet:#1E2924; --ink:#E8EEF2; --muted:#A3B0BA; --line:#3A4750;
+  --soil:#5E4631; --soil-dark:#4A3626; --water:#6FA8EA; --sugar:#F28C45; --key:#3A3322; --orange:#F28C45; --blue:#6F9BEA;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px); scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{margin:0; background:var(--paper); color:var(--ink);
+  font-family:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",Arial,sans-serif; font-size:18px; line-height:1.55}
+main{max-width:980px; margin:0 auto; padding:26px 18px 60px}
+h1{font-size:clamp(1.9rem,5vw,2.8rem); line-height:1.1; margin:0 0 10px}
+h2{font-size:1.45rem; margin:0 0 10px}
+p{margin:0 0 12px; max-width:68ch}
+nav.top{display:flex; gap:10px; flex-wrap:wrap; margin:14px 0 6px}
+a.jump{color:var(--ink); border:2px solid var(--ink); padding:6px 12px; text-decoration:none; font-weight:700; background:var(--sheet)}
+a.jump:hover{background:var(--paper)}
+a.jump:focus-visible, button:focus-visible{outline:3px solid var(--water); outline-offset:2px}
+
+.hero{display:grid; grid-template-columns:1fr 1.15fr; gap:22px; align-items:center; margin-bottom:28px}
+@media (max-width:820px){.hero{grid-template-columns:1fr}}
+.hero p.lead{font-size:1.15rem}
+figure{margin:0}
+figure svg{display:block; width:100%; height:auto}
+figcaption{font-size:.9rem; color:var(--muted); margin-top:6px}
+
+section.block{background:var(--sheet); border:2px solid var(--ink); padding:20px; margin-top:22px}
+.two{display:grid; grid-template-columns:1fr 1fr; gap:18px}
+@media (max-width:720px){.two{grid-template-columns:1fr}}
+.exchange{border:2px solid var(--line); padding:14px}
+.exchange h3{margin:0 0 6px; font-size:1.1rem}
+.exchange.w{border-color:var(--water)} .exchange.s{border-color:var(--sugar)}
+.exchange.w h3{color:var(--water)} .exchange.s h3{color:var(--sugar)}
+.word{font-weight:700; border-bottom:2px dotted currentColor}
+
+.retenir{background:var(--key); border:2px solid var(--ink); padding:18px 20px; margin-top:22px}
+.retenir h2{margin-bottom:6px}
+.retenir ul{margin:0; padding-left:1.2em}
+.retenir li{margin:4px 0}
+
+/* quiz */
+#quiz{margin-top:34px}
+.quiz-card{background:var(--sheet); border:2px solid var(--ink); padding:22px}
+.progress{display:flex; gap:4px; margin:0 0 16px}
+.progress span{flex:1; height:8px; background:var(--line)}
+.progress span.done-ok{background:var(--ok)} .progress span.done-bad{background:var(--bad)} .progress span.now{background:var(--ink)}
+.qnum{color:var(--muted); font-size:.95rem; margin-bottom:4px}
+.qtext{font-size:1.25rem; font-weight:700; margin:0 0 16px; max-width:none}
+.options{display:grid; gap:10px}
+.opt{font:inherit; text-align:left; border:2px solid var(--line); background:var(--paper); color:var(--ink); padding:12px 14px; cursor:pointer; display:flex; gap:12px; align-items:flex-start}
+.opt:hover:not(:disabled){border-color:var(--ink)}
+.opt .letter{font-weight:700; min-width:1.4em}
+.opt.right{border-color:var(--ok); background:color-mix(in srgb, var(--ok) 14%, var(--paper))}
+.opt.wrong{border-color:var(--bad); background:color-mix(in srgb, var(--bad) 12%, var(--paper))}
+.opt:disabled{cursor:default}
+.feedback{margin-top:14px; padding:12px 14px; border-left:5px solid var(--line); display:none}
+.feedback.show{display:block}
+.feedback.ok{border-color:var(--ok)} .feedback.bad{border-color:var(--bad)}
+.feedback strong{display:block; margin-bottom:2px}
+.actions{display:flex; gap:10px; margin-top:16px; flex-wrap:wrap}
+button.btn{font:inherit; font-weight:700; border:2px solid var(--ink); background:var(--ink); color:var(--sheet); padding:9px 16px; cursor:pointer}
+button.btn.ghost{background:var(--sheet); color:var(--ink)}
+.result{text-align:center; padding:10px 0}
+.result .score{font-size:3.2rem; font-weight:700; line-height:1}
+.review{text-align:left; margin-top:18px}
+.review li{margin:6px 0}
+
+/* ===== activité : plantes et tableau ===== */
+#viewActivity h1{font-size:1.7rem; margin:0 0 4px; text-decoration:underline; text-underline-offset:5px}
+#viewActivity .consigne{color:var(--muted); margin:0 0 18px; max-width:75ch; font-size:17px}
+#viewActivity .consigne ol{margin:6px 0 0; padding-left:1.3em}
+#viewActivity .panel{background:var(--sheet); border:2px solid var(--ink); padding:16px; font-size:17px}
+#viewActivity .panel h2{font-size:1.1rem; margin:0 0 10px}
+#viewActivity .layout{max-width:560px; margin:22px auto 0}
+.backbar{display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:16px}
+[hidden]{display:none !important}
+
+.plant-controls{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:6px}
+.plant-controls strong{font-size:1.35rem; min-width:4.6em}
+#daySlider{flex:1; min-width:150px; accent-color:var(--ink)}
+#plants{display:block; width:100%; max-width:820px; height:auto; margin:0 auto}
+#plants text{fill:var(--ink)}
+
+#viewActivity button.btn{font:inherit; font-size:.95rem; border:2px solid var(--ink); background:var(--sheet); color:var(--ink); padding:6px 12px; cursor:pointer}
+#viewActivity button.btn:hover{background:var(--paper)}
+#viewActivity button.btn:focus-visible, #viewActivity input:focus-visible{outline:3px solid var(--blue); outline-offset:2px}
+#viewActivity button.btn[aria-pressed="true"]{color:#fff}
+
+/* tableau */
+.table-wrap{overflow-x:auto}
+table{border-collapse:collapse; width:100%}
+th,td{border:1.5px solid var(--line); padding:0; text-align:center}
+thead th{font-size:.88rem; padding:7px 5px; background:var(--paper)}
+tbody th{font-weight:700; padding:4px 8px; width:4em}
+th .swatch{display:inline-block; width:11px; height:11px; margin-right:4px}
+td input{width:100%; min-width:60px; border:0; background:transparent; color:var(--ink); font:inherit; text-align:center; padding:5px 4px}
+td input:focus{outline:3px solid var(--blue); outline-offset:-3px}
+td input.err{background:color-mix(in srgb, var(--bad) 15%, transparent)}
+tr.current th, tr.current td{background:color-mix(in srgb, var(--leaf) 18%, transparent)}
+
+.msg{min-height:1.4em; margin-top:8px; font-size:.95rem}
+.msg.bad{color:var(--bad)} .msg.ok{color:var(--ok)}
+
+details{margin-top:16px; border-top:1.5px dashed var(--line); padding-top:10px}
+summary{cursor:pointer; font-weight:700}
+.prof{display:grid; gap:8px; margin-top:10px; font-size:.95rem}
+.prof label{display:flex; gap:8px; align-items:center}
+</style>
+</head>
+<body>
+<main>
+<div id="viewLearn">
+  <header class="hero">
+    <div>
+      <h1>Les mycorhizes</h1>
+      <p class="lead">Sous nos pieds, les racines des plantes ne travaillent pas seules. Elles s'associent avec des champignons : c'est ce qu'on appelle une <span class="word">mycorhize</span>.</p>
+      <p>« Myco » veut dire champignon et « rhize » veut dire racine.</p>
+      <nav class="top" aria-label="Aller à">
+        <a class="jump" href="#echanges">Qui donne quoi ?</a>
+        <a class="jump" href="#retenir">À retenir</a>
+        <a class="jump" href="#quiz">Faire le quiz</a>
+        <a class="jump" href="#" id="goActivityNav" hidden>Aller à l'activité</a>
+      </nav>
+    </div>
+    <figure>
+      <svg id="schema" viewBox="0 0 520 420" role="img" aria-labelledby="schemaTitle">
+        <title id="schemaTitle">Schéma : une plante, ses racines dans le sol et les filaments du champignon. Le champignon apporte l'eau et les sels minéraux à la racine ; la plante donne des sucres au champignon.</title>
+      </svg>
+      <figcaption>Schéma simplifié d'une mycorhize (les filaments sont agrandis : en vrai, ils sont microscopiques).</figcaption>
+    </figure>
+  </header>
+
+  <section class="block" aria-labelledby="t1">
+    <h2 id="t1">C'est quoi, exactement ?</h2>
+    <p>Une mycorhize est une <strong>association entre un champignon et les racines d'une plante</strong>. Le champignon forme dans le sol un immense réseau de filaments très fins, invisibles à l'œil nu : le <span class="word">mycélium</span>. Ces filaments entourent les racines ou entrent même à l'intérieur.</p>
+    <p>Ce n'est pas une maladie : la plante et le champignon y gagnent tous les deux. Une association bénéfique pour les deux partenaires s'appelle une <span class="word">symbiose</span>.</p>
+  </section>
+
+  <section class="block" id="echanges" aria-labelledby="t2">
+    <h2 id="t2">Qui donne quoi ?</h2>
+    <div class="two">
+      <div class="exchange w">
+        <h3>Le champignon donne à la plante</h3>
+        <p style="margin:0">De l'<strong>eau</strong> et des <strong>sels minéraux</strong>. Ses filaments vont les chercher loin dans le sol, là où les racines n'arrivent pas.</p>
+      </div>
+      <div class="exchange s">
+        <h3>La plante donne au champignon</h3>
+        <p style="margin:0">Des <strong>sucres</strong> (de la matière organique), dont le champignon a besoin pour se nourrir.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="t3">
+    <h2 id="t3">Comment le champignon aide la racine</h2>
+    <p>Les filaments du champignon agissent comme des racines supplémentaires, en beaucoup plus fins et plus longs. Ils <strong>augmentent la surface de contact avec le sol</strong>, donc la plante peut prélever plus d'eau et de sels minéraux.</p>
+  </section>
+
+  <section class="block" aria-labelledby="t4">
+    <h2 id="t4">Dans la nature</h2>
+    <p>La grande majorité des plantes (environ 8 sur 10) forment des mycorhizes : les arbres de nos forêts, mais aussi le blé, la tomate ou le maïs.</p>
+    <p>Certains de ces champignons sont bien connus. La <strong>truffe</strong> vit associée aux racines du chêne, et le <strong>cèpe</strong> à celles du chêne, du hêtre ou du pin. Ce qu'on ramasse en forêt n'est qu'une petite partie du champignon : l'essentiel, c'est le mycélium caché dans le sol.</p>
+  </section>
+
+  <aside class="retenir" id="retenir" aria-labelledby="t5">
+    <h2 id="t5">À retenir</h2>
+    <ul>
+      <li>Une mycorhize est une association entre un champignon et les racines d'une plante.</li>
+      <li>Le champignon apporte à la plante de l'eau et des sels minéraux.</li>
+      <li>La plante apporte au champignon des sucres.</li>
+      <li>Les deux partenaires en profitent : c'est une symbiose.</li>
+    </ul>
+  </aside>
+
+  <section id="quiz" aria-labelledby="tq">
+    <h2 id="tq">Quiz : as-tu bien compris ?</h2>
+    <div class="quiz-card" id="quizCard"></div>
+  </section>
+</div>
+
+<div id="viewActivity" hidden>
+  <div class="backbar">
+    <a class="jump" href="#" id="backLearn">Revenir à la présentation</a>
+  </div>
+  <h1>Activité 3-S1 : les mycorhizes et les racines</h1>
+  <div class="consigne">
+    On fait pousser deux plantes pendant 15 jours : l'une avec des mycorhizes, l'autre sans.
+    <ol>
+      <li>Avance jour par jour et mesure la taille de chaque plante avec la règle.</li>
+      <li>Note tes mesures dans le tableau.</li>
+    </ol>
+  </div>
+
+  <!-- 1. Les plantes -->
+  <section class="panel" aria-labelledby="t-plants">
+    <h2 id="t-plants">Les plantes</h2>
+    <div class="plant-controls">
+      <button class="btn" id="prev" type="button" aria-label="Jour précédent">◀</button>
+      <strong id="dayLabel" aria-live="polite">Jour 1</strong>
+      <button class="btn" id="next" type="button" aria-label="Jour suivant">▶</button>
+      <input type="range" id="daySlider" min="1" max="15" value="1" step="1" aria-label="Choisir le jour">
+      <button class="btn" id="play" type="button">Voir la croissance</button>
+    </div>
+    <svg id="plants" viewBox="0 0 720 395" role="img" aria-label="Les deux plantes au jour choisi"></svg>
+  </section>
+
+  <div class="layout">
+    <!-- 2. Le tableau -->
+    <section class="panel" aria-labelledby="t-table">
+      <h2 id="t-table">Mes mesures</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th scope="col">Temps<br>(en j)</th>
+            <th scope="col"><span class="swatch" style="background:var(--orange)"></span>Avec<br>mycorhize (cm)</th>
+            <th scope="col"><span class="swatch" style="background:var(--blue)"></span>Sans<br>mycorhize (cm)</th>
+          </tr></thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+      <div class="msg" id="tableMsg" role="status" aria-live="polite"></div>
+      <details>
+        <summary>Espace professeur</summary>
+        <div class="prof">
+          <label><input type="checkbox" id="showMeasure" checked> Afficher la taille au-dessus des plantes</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn" id="fillTable" type="button">Remplir le tableau (correction)</button>
+            <button class="btn" id="resetAll" type="button">Tout remettre à zéro</button>
+          </div>
+        </div>
+      </details>
+    </section>
+
+  </div>
+</div>
+</main>
+
+<script>
+(function(){
+  /* ============ SCHÉMA ============ */
+  const NS = "http://www.w3.org/2000/svg";
+  const svg = document.getElementById("schema");
+  function el(n, a, p){ const e = document.createElementNS(NS, n); for (const k in a) e.setAttribute(k, a[k]); (p||svg).appendChild(e); return e; }
+  function drawSchema(){
+    [...svg.querySelectorAll(":not(title)")].forEach(n => n.remove());
+    const cs = getComputedStyle(document.documentElement), c = n => cs.getPropertyValue(n).trim();
+    const G = 150;
+    // sol
+    el("rect",{x:0, y:G, width:520, height:270, fill:c("--soil")});
+    for (let i = 0; i < 70; i++){ el("circle",{cx:(i*73)%520, cy:G+12+((i*37)%250), r:2+(i%3), fill:c("--soil-dark")}); }
+    el("line",{x1:0, x2:520, y1:G, y2:G, stroke:c("--soil-dark"), "stroke-width":3});
+    // plante
+    const cx = 200;
+    el("path",{d:`M${cx} ${G} Q${cx+8} ${G-60} ${cx} ${G-120}`, stroke:c("--stem"), "stroke-width":6, fill:"none", "stroke-linecap":"round"});
+    [[G-40,1],[G-62,-1],[G-84,1],[G-104,-1]].forEach(([y,s],i) => el("path",{d:"M0 0 Q16 -14 36 0 Q16 11 0 0Z", fill:c("--leaf"), stroke:c("--stem"), transform:`translate(${cx+3} ${y}) rotate(${s>0?-25:205}) scale(${1.15-i*0.08})`}));
+    el("text",{x:cx-90, y:G-70, "font-size":16, "font-weight":700, fill:c("--ink")}).textContent = "plante";
+    // racines
+    const roots = [[-70,120],[-35,175],[0,200],[35,170],[75,110]];
+    const tips = [];
+    roots.forEach(([dx,dy]) => {
+      const ex = cx+dx, ey = G+dy;
+      el("path",{d:`M${cx} ${G} Q${cx+dx*0.35} ${G+dy*0.6} ${ex} ${ey}`, stroke:c("--root"), "stroke-width":5, fill:"none", "stroke-linecap":"round"});
+      tips.push([ex,ey]);
+    });
+    // filaments du champignon (mycélium)
+    let seed = 7; const rnd = () => (seed = (seed*9301+49297)%233280)/233280;
+    tips.forEach(([x,y]) => {
+      for (let k = 0; k < 6; k++){
+        let px = x, py = y, d = "M"+px+" "+py, ang = rnd()*Math.PI*2;
+        for (let s = 0; s < 4; s++){ ang += (rnd()-.5)*1.2; px += Math.cos(ang)*(18+rnd()*14); py += Math.sin(ang)*(12+rnd()*10); d += ` L${px.toFixed(1)} ${Math.min(410,Math.max(G+8,py)).toFixed(1)}`; }
+        el("path",{d, stroke:c("--hypha"), "stroke-width":1.4, fill:"none", opacity:.9, "stroke-dasharray":"3 2"});
+      }
+    });
+    // flèches d'échange
+    const defs = el("defs",{});
+    [["aw",c("--water")],["as",c("--sugar")]].forEach(([id,col]) => {
+      const m = el("marker",{id, viewBox:"0 0 10 10", refX:8, refY:5, markerWidth:7, markerHeight:7, orient:"auto-start-reverse"}, defs);
+      el("path",{d:"M0 0 L10 5 L0 10 z", fill:col}, m);
+    });
+    el("path",{d:"M455 330 Q380 300 300 280", stroke:c("--water"), "stroke-width":5, fill:"none", "marker-end":"url(#aw)"});
+    el("path",{d:"M290 245 Q370 235 440 255", stroke:c("--sugar"), "stroke-width":5, fill:"none", "marker-end":"url(#as)"});
+    const label = (x,y,t,col) => { const tx = el("text",{x, y, "font-size":16, "font-weight":700, fill:col, "text-anchor":"middle", stroke:c("--soil"), "stroke-width":5, "paint-order":"stroke"}); tx.textContent = t; };
+    label(440, 365, "eau + sels minéraux", c("--water"));
+    label(440, 228, "sucres", c("--sugar"));
+    label(cx-95, 330, "racine", c("--root"));
+    label(cx+150, 395, "filaments du champignon", c("--hypha"));
+  }
+  drawSchema();
+  if (window.matchMedia) matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", drawSchema);
+
+  /* ============ QUIZ ============ */
+  const QUESTIONS = [
+    { q:"Une mycorhize, c'est…",
+      o:["Une association entre un champignon et les racines d'une plante","Une maladie des feuilles","Une sorte de racine très longue","Un insecte qui vit dans le sol"],
+      a:0, e:"« Myco » = champignon, « rhize » = racine : c'est l'association des deux." },
+    { q:"Que fournit le champignon à la plante ?",
+      o:["Des sucres","De l'eau et des sels minéraux","Des graines","Des feuilles"],
+      a:1, e:"Ses filaments puisent l'eau et les sels minéraux loin dans le sol et les transmettent aux racines." },
+    { q:"Que fournit la plante au champignon ?",
+      o:["Des sels minéraux","De l'eau","Des sucres","Des graines"],
+      a:2, e:"La plante donne des sucres au champignon : c'est ce qui le nourrit." },
+    { q:"Comment les filaments du champignon aident-ils les racines ?",
+      o:["Ils protègent la plante du froid","Ils remplacent les feuilles","Ils augmentent la surface de contact avec le sol","Ils rendent la terre plus dure"],
+      a:2, e:"Plus la surface de contact avec le sol est grande, plus la plante peut prélever d'eau et de sels minéraux." },
+    { q:"Pour qui l'association est-elle bénéfique ?",
+      o:["Seulement pour la plante","Seulement pour le champignon","Pour la plante et pour le champignon","Pour aucun des deux"],
+      a:2, e:"Chacun reçoit ce qui lui manque : c'est une symbiose." },
+  ];
+  const card = document.getElementById("quizCard");
+  let order, idx, answers;
+
+  function shuffle(a){ a = a.slice(); for (let i = a.length-1; i > 0; i--){ const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]] = [a[j],a[i]]; } return a; }
+  function start(){
+    order = QUESTIONS.map(q => { const perm = shuffle(q.o.map((_,i) => i)); return {...q, o:perm.map(i => q.o[i]), a:perm.indexOf(q.a)}; });
+    idx = 0; answers = []; render();
+  }
+  function progress(){
+    return `<div class="progress" aria-hidden="true">${order.map((_,i) =>
+      `<span class="${i < answers.length ? (answers[i] ? "done-ok" : "done-bad") : i === idx ? "now" : ""}"></span>`).join("")}</div>`;
+  }
+  const esc = s => s.replace(/[&<>]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[ch]));
+  function render(){
+    if (idx >= order.length) return result();
+    const Q = order[idx];
+    card.innerHTML = progress() +
+      `<div class="qnum">Question ${idx+1} sur ${order.length}</div>
+       <p class="qtext" id="qt" tabindex="-1">${esc(Q.q)}</p>
+       <div class="options" role="group" aria-labelledby="qt">${Q.o.map((o,i) =>
+         `<button class="opt" type="button" data-i="${i}"><span class="letter">${"ABCD"[i]}</span><span>${esc(o)}</span></button>`).join("")}</div>
+       <div class="feedback" id="fb" role="status" aria-live="polite"></div>
+       <div class="actions" id="act"></div>`;
+    card.querySelectorAll(".opt").forEach(b => b.addEventListener("click", () => choose(+b.dataset.i)));
+  }
+  function choose(i){
+    const Q = order[idx], ok = i === Q.a;
+    answers.push(ok);
+    card.querySelectorAll(".opt").forEach((b,k) => {
+      b.disabled = true;
+      if (k === Q.a) b.classList.add("right");
+      else if (k === i) b.classList.add("wrong");
+    });
+    const fb = document.getElementById("fb");
+    fb.className = "feedback show " + (ok ? "ok" : "bad");
+    fb.innerHTML = `<strong>${ok ? "Bonne réponse !" : "Pas tout à fait."}</strong>${esc(Q.e)}`;
+    card.querySelector(".progress").outerHTML = progress();
+    const last = idx === order.length - 1;
+    document.getElementById("act").innerHTML = `<button class="btn" type="button" id="nextQ">${last ? "Voir mon score" : "Question suivante"}</button>`;
+    const nb = document.getElementById("nextQ");
+    nb.addEventListener("click", () => { idx++; render(); const t = document.getElementById("qt") || card.querySelector(".result"); t && t.focus(); });
+    nb.focus();
+  }
+  function result(){
+    const score = answers.filter(Boolean).length, n = order.length;
+    const msg = score === n ? "Parfait, tu maîtrises les mycorhizes !" :
+                score >= n*0.7 ? "Très bien ! Relis les questions ratées pour tout retenir." :
+                score >= n*0.5 ? "C'est un bon début. Relis la partie « À retenir » puis recommence." :
+                "Relis la présentation tranquillement, puis retente le quiz.";
+    const missed = order.map((Q,i) => answers[i] ? "" : `<li><strong>${esc(Q.q)}</strong><br>${esc(Q.o[Q.a])}</li>`).join("");
+    card.innerHTML = progress() +
+      `<div class="result" tabindex="-1">
+         <div class="score">${score} / ${n}</div>
+         <p style="margin:10px auto 0">${msg}</p>
+       </div>
+       ${missed ? `<div class="review"><h3 style="margin:0 0 4px;font-size:1.1rem">Les bonnes réponses à revoir</h3><ul>${missed}</ul></div>` : ""}
+       <div class="actions" style="justify-content:center">
+         <button class="btn" type="button" id="goActivity">Passer à l'activité : les plantes</button>
+         <button class="btn ghost" type="button" id="again">Recommencer le quiz</button>
+         <a class="jump" href="#retenir">Relire « À retenir »</a>
+       </div>`;
+    document.getElementById("again").addEventListener("click", () => { start(); document.getElementById("qt").focus(); });
+    document.getElementById("goActivity").addEventListener("click", showActivity);
+    try{ localStorage.setItem(DONE, "1"); }catch(e){}
+    document.getElementById("goActivityNav").hidden = false;
+  }
+  /* navigation présentation <-> activité */
+  const DONE = "mycorhizes-quiz-fait";
+  const vLearn = document.getElementById("viewLearn"), vAct = document.getElementById("viewActivity");
+  function showActivity(e){ if (e) e.preventDefault(); vLearn.hidden = true; vAct.hidden = false; window.scrollTo(0,0); vAct.querySelector("h1").setAttribute("tabindex","-1"); vAct.querySelector("h1").focus(); }
+  function showLearn(e){ if (e) e.preventDefault(); vAct.hidden = true; vLearn.hidden = false; window.scrollTo(0,0); }
+  document.getElementById("backLearn").addEventListener("click", showLearn);
+  document.getElementById("goActivityNav").addEventListener("click", showActivity);
+  try{ if (localStorage.getItem(DONE)) document.getElementById("goActivityNav").hidden = false; }catch(e){}
+
+  start();
+})();
+</script>
+<script>
+(function(){
+  const NS = "http://www.w3.org/2000/svg";
+  const N = 15;                         // 15 jours : jour 1 à jour 15 (index 0 à 14)
+  const YMAX = 16, YSTEP = 2;
+  const REF = {
+    a:[2,2.5,3,3.6,4.2,4.9,5.6,6.4,7.2,8.1,9,10,11,12.1,13.2],
+    b:[2,2.4,2.8,3.2,3.7,4.2,4.7,5.2,5.8,6.4,7,7.6,8.3,9,9.7]
+  };
+  const STORE = "mycorhizes-15j-v2";
+  const $ = id => document.getElementById(id);
+  const css = () => getComputedStyle(document.documentElement);
+  const col = n => css().getPropertyValue(n).trim();
+  const fmt = n => String(Math.round(n*10)/10).replace(".", ",");
+  const parse = s => { s = (s||"").trim().replace(",", "."); if (s === "") return null; const n = Number(s); return isFinite(n) ? n : NaN; };
+  function el(name, attrs, parent){ const e = document.createElementNS(NS, name); for (const k in attrs) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; }
+
+  let state = {
+    table: Array.from({length:N}, () => ["",""]),
+    day: 0, showMeasure: true
+  };
+
+  function save(){ try{ localStorage.setItem(STORE, JSON.stringify(state)); }catch(e){} }
+  function load(){
+    try{
+      const s = JSON.parse(localStorage.getItem(STORE) || "null");
+      if (s && Array.isArray(s.table) && s.table.length === N) state = Object.assign(state, s);
+    }catch(e){}
+  }
+
+  /* ================= PLANTES ================= */
+  const plantsSvg = $("plants");
+  let shown = {a:REF.a[0], b:REF.b[0]}, anim = null, playing = null;
+  const reduceMotion = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function setDay(d, instant){
+    d = Math.max(0, Math.min(N-1, d));
+    state.day = d;
+    $("daySlider").value = d + 1;
+    $("dayLabel").textContent = "Jour " + (d + 1);
+    $("prev").disabled = d === 0; $("next").disabled = d === N-1;
+    document.querySelectorAll("#rows tr").forEach((tr,i) => tr.classList.toggle("current", i === d));
+    animatePlants(instant);
+    save();
+  }
+
+  function animatePlants(instant){
+    const target = {a:REF.a[state.day], b:REF.b[state.day]};
+    const from = {...shown}, t0 = performance.now(), dur = (instant || reduceMotion) ? 0 : 650;
+    cancelAnimationFrame(anim);
+    function step(t){
+      const k = dur ? Math.min(1, (t - t0) / dur) : 1, e = 1 - Math.pow(1 - k, 3);
+      shown = {a: from.a + (target.a - from.a)*e, b: from.b + (target.b - from.b)*e};
+      renderPlants();
+      if (k < 1) anim = requestAnimationFrame(step);
+    }
+    anim = requestAnimationFrame(step);
+  }
+
+  function renderPlants(){
+    plantsSvg.innerHTML = "";
+    const G = 300, avail = 260, px = v => Math.max(0, v / YMAX * avail);
+    const mk = (n,a) => el(n, a, plantsSvg);
+    const ink = col("--ink");
+    // règle graduée
+    const rx = 360;
+    mk("rect",{x:rx-14, y:G-avail-4, width:28, height:avail+4, fill:col("--sheet"), stroke:ink, "stroke-width":1.5});
+    for (let v = 0; v <= YMAX*2; v++){
+      const y = G - px(v/2), big = v % 2 === 0;
+      mk("line",{x1:rx-14, x2:rx-14+(big?14:7), y1:y, y2:y, stroke:ink, "stroke-width":big?1.8:1});
+      if (big) mk("text",{x:rx+20, y:y+5, "font-size":14}).textContent = v/2;
+    }
+    mk("text",{x:rx, y:G-avail-12, "text-anchor":"middle", "font-size":14}).textContent = "cm";
+    // repères horizontaux discrets vers les plantes
+    drawPlant(185, shown.a, true,  "Avec mycorhize", col("--orange"), G, px, mk);
+    drawPlant(535, shown.b, false, "Sans mycorhize", col("--blue"),   G, px, mk);
+  }
+
+  function drawPlant(cx, val, myco, label, color, G, px, mk){
+    const potBot = G + 62, h = px(val);
+    // trait pointillé du sommet vers la règle
+    const side = cx < 360 ? 1 : -1;
+    mk("line",{x1:cx, x2:360 - side*14, y1:G-h, y2:G-h, stroke:color, "stroke-width":1.3, "stroke-dasharray":"4 4"});
+    // pot en coupe
+    mk("path",{d:`M${cx-62} ${G} L${cx+62} ${G} L${cx+46} ${potBot} L${cx-46} ${potBot} Z`, fill:col("--soil"), stroke:col("--pot"), "stroke-width":4});
+    const rl = Math.min(48, 10 + h*0.25);
+    [-1,-0.5,0,0.5,1].forEach(k => {
+      const ex = cx + k*rl, ey = G + 4 + rl*(0.65 + 0.35*(1 - Math.abs(k)));
+      mk("path",{d:`M${cx} ${G+2} Q${cx+k*rl*0.5} ${G+4+rl*0.5} ${ex} ${ey}`, stroke:col("--root"), "stroke-width":2.2, fill:"none", "stroke-linecap":"round"});
+      if (myco) [-1,1].forEach(s => {
+        const len = 6 + rl*0.35;
+        mk("path",{d:`M${ex} ${ey} q${s*len*0.6} ${-len*0.2} ${s*len} ${len*0.3}`, stroke:col("--hypha"), "stroke-width":1.3, "stroke-dasharray":"2 2.5", fill:"none"});
+      });
+    });
+    mk("rect",{x:cx-68, y:G-8, width:136, height:12, rx:3, fill:col("--pot")});
+    // tige, feuilles, bourgeon
+    const w = Math.max(2.5, Math.min(6, 2.5 + h/50));
+    mk("path",{d:`M${cx} ${G-4} Q${cx+8} ${G-h/2} ${cx} ${G-h}`, stroke:col("--stem"), "stroke-width":w, fill:"none", "stroke-linecap":"round"});
+    const n = Math.floor(h / 18);
+    for (let i = 1; i <= n; i++){
+      const t = (i*18)/h, x = cx + 16*t*(1-t), y = G - i*18;
+      const sd = i % 2 ? 1 : -1, s = Math.min(1.25, 0.7 + (n - i)*0.07);
+      mk("path",{d:"M0 0 Q12 -10 26 0 Q12 8 0 0Z", fill:col("--leaf"), stroke:col("--stem"), "stroke-width":1,
+        transform:`translate(${x} ${y}) rotate(${sd > 0 ? -25 : 205}) scale(${s})`});
+    }
+    [-1,1].forEach(s => mk("path",{d:"M0 0 Q6 -6 13 0 Q6 4 0 0Z", fill:col("--leaf"), stroke:col("--stem"), "stroke-width":1,
+      transform:`translate(${cx} ${G-h}) rotate(${s > 0 ? -60 : 240})`}));
+    if (state.showMeasure){
+      mk("text",{x:cx - side*40, y:Math.max(16, G-h-12), "text-anchor":"middle", "font-size":19, "font-weight":700, style:`fill:${color}`}).textContent = fmt(val) + " cm";
+    }
+    mk("text",{x:cx, y:potBot+24, "text-anchor":"middle", "font-size":17, style:`fill:${color}`}).textContent = label;
+  }
+
+  $("daySlider").addEventListener("input", e => { stopPlay(); setDay(+e.target.value - 1); });
+  $("prev").addEventListener("click", () => { stopPlay(); setDay(state.day - 1); });
+  $("next").addEventListener("click", () => { stopPlay(); setDay(state.day + 1); });
+  function stopPlay(){ clearInterval(playing); playing = null; $("play").textContent = "Voir la croissance"; }
+  $("play").addEventListener("click", () => {
+    if (playing){ stopPlay(); return; }
+    setDay(0); $("play").textContent = "Arrêter";
+    playing = setInterval(() => { if (state.day >= N-1){ stopPlay(); return; } setDay(state.day + 1); }, 800);
+  });
+
+  /* ================= TABLEAU ================= */
+  function buildTable(){
+    const tb = $("rows"); tb.innerHTML = "";
+    for (let d = 0; d < N; d++){
+      const tr = document.createElement("tr");
+      const th = document.createElement("th"); th.scope = "row"; th.textContent = d + 1; tr.appendChild(th);
+      [0,1].forEach(k => {
+        const td = document.createElement("td"), inp = document.createElement("input");
+        inp.type = "text"; inp.inputMode = "decimal"; inp.value = state.table[d][k];
+        inp.setAttribute("aria-label", `Jour ${d+1}, taille ${k ? "sans" : "avec"} mycorhize en cm`);
+        inp.addEventListener("focus", () => { if (state.day !== d){ stopPlay(); setDay(d); } });
+        inp.addEventListener("input", () => { state.table[d][k] = inp.value; checkTable(); save(); });
+        inp.addEventListener("keydown", e => {
+          if (e.key === "Enter"){ e.preventDefault(); const nx = tr.nextElementSibling; if (nx) nx.querySelectorAll("input")[k].focus(); }
+        });
+        td.appendChild(inp); tr.appendChild(td);
+      });
+      tb.appendChild(tr);
+    }
+  }
+  function checkTable(){
+    let errs = 0, filled = 0;
+    document.querySelectorAll("#rows tr").forEach((tr,d) => {
+      tr.querySelectorAll("input").forEach((inp,k) => {
+        const v = parse(state.table[d][k]); const bad = Number.isNaN(v);
+        inp.classList.toggle("err", bad); if (bad) errs++; else if (v !== null) filled++;
+      });
+    });
+    const m = $("tableMsg");
+    if (errs){ m.className = "msg bad"; m.textContent = "Une case en rouge ne contient pas un nombre. Écris seulement des chiffres (avec une virgule si besoin)."; }
+    else if (filled === N*2){ m.className = "msg ok"; m.textContent = "Ton tableau est complet."; }
+    else { m.className = "msg"; m.textContent = filled ? `${filled} mesures sur ${N*2} notées.` : ""; }
+  }
+
+  /* ================= ESPACE PROFESSEUR ================= */
+  $("showMeasure").addEventListener("change", e => { state.showMeasure = e.target.checked; renderPlants(); save(); });
+  $("fillTable").addEventListener("click", () => {
+    state.table = REF.a.map((v,d) => [fmt(v), fmt(REF.b[d])]);
+    buildTable(); checkTable(); setDay(state.day, true); save();
+  });
+  $("resetAll").addEventListener("click", () => {
+    if (!confirm("Effacer toutes les mesures du tableau ?")) return;
+    try{ localStorage.removeItem(STORE); }catch(e){}
+    location.reload();
+  });
+
+  /* ================= DÉMARRAGE ================= */
+  load();
+  $("showMeasure").checked = state.showMeasure;
+  buildTable(); checkTable();
+  shown = {a:REF.a[state.day], b:REF.b[state.day]};
+  setDay(state.day, true);
+  if (window.matchMedia) matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", renderPlants);
+})();
+</script>
+</body>
+</html>
